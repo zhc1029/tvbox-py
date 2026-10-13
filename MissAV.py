@@ -23,10 +23,12 @@ import ssl
 
 try:
     from urllib.request import Request, urlopen
+    from urllib.error import HTTPError
     from urllib.parse import quote
 except ImportError:  # pragma: no cover
     from urllib import quote
     from urllib2 import Request, urlopen
+    HTTPError = Exception
 
 DEBUG = True
 
@@ -53,7 +55,21 @@ def _log(msg):
 
 
 def _fetch(url):
-    headers = {"User-Agent": UA, "Referer": HOST + "/cn/"}
+    headers = {
+        "User-Agent": UA,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "Cache-Control": "max-age=0",
+        "Sec-CH-UA": '"Chromium";v="120", "Google Chrome";v="120", "Not-A.Brand";v="99"',
+        "Sec-CH-UA-Mobile": "?0",
+        "Sec-CH-UA-Platform": '"Windows"',
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+        "Referer": HOST + "/cn/",
+    }
     if _COOKIE:
         headers["Cookie"] = _COOKIE
     _log("fetch %s cookie=%s" % (url, bool(_COOKIE)))
@@ -63,20 +79,26 @@ def _fetch(url):
         code = resp.getcode()
         raw = resp.read()
         _log("fetch ok code=%s len=%d" % (code, len(raw)))
-        for enc in ("utf-8", "gbk", "gb18030"):
-            try:
-                txt = raw.decode(enc)
-                break
-            except Exception:
-                continue
-        else:
-            txt = raw.decode("utf-8", "ignore")
-        if "cf-chl" in txt or "Just a moment" in txt or "challenge-platform" in txt:
-            _log("fetch got CLOUDFLARE CHALLENGE page")
-        return txt
+        return _decode(raw)
+    except HTTPError as e:
+        try:
+            body = e.read()
+            _log("fetch HTTPError code=%s len=%d body=%s" % (e.code, len(body), _decode(body)[:600]))
+        except Exception as ex:
+            _log("fetch HTTPError code=%s (no body: %s)" % (e.code, ex))
+        return ""
     except Exception as e:
         _log("fetch fail %s -> %s" % (url, e))
         return ""
+
+
+def _decode(raw):
+    for enc in ("utf-8", "gbk", "gb18030"):
+        try:
+            return raw.decode(enc)
+        except Exception:
+            continue
+    return raw.decode("utf-8", "ignore")
 
 
 def _clean(txt):

@@ -1,0 +1,5 @@
+{
+  "sites": [
+    {"key":"py_missav","name":"MissAV","type":3,"api":"https://raw.githubusercontent.com/zhc1029/tvbox-py/main/MissAV.py","ext":""}
+  ]
+}

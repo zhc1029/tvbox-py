@@ -28,7 +28,7 @@ except ImportError:  # pragma: no cover
     from urllib import quote
     from urllib2 import Request, urlopen
 
-DEBUG = False
+DEBUG = True
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
@@ -56,16 +56,24 @@ def _fetch(url):
     headers = {"User-Agent": UA, "Referer": HOST + "/cn/"}
     if _COOKIE:
         headers["Cookie"] = _COOKIE
+    _log("fetch %s cookie=%s" % (url, bool(_COOKIE)))
     try:
         req = Request(url, headers=headers)
         resp = urlopen(req, timeout=15, context=_SSL_CTX)
+        code = resp.getcode()
         raw = resp.read()
+        _log("fetch ok code=%s len=%d" % (code, len(raw)))
         for enc in ("utf-8", "gbk", "gb18030"):
             try:
-                return raw.decode(enc)
+                txt = raw.decode(enc)
+                break
             except Exception:
                 continue
-        return raw.decode("utf-8", "ignore")
+        else:
+            txt = raw.decode("utf-8", "ignore")
+        if "cf-chl" in txt or "Just a moment" in txt or "challenge-platform" in txt:
+            _log("fetch got CLOUDFLARE CHALLENGE page")
+        return txt
     except Exception as e:
         _log("fetch fail %s -> %s" % (url, e))
         return ""
@@ -97,6 +105,7 @@ def _parse_list(html):
     if not html:
         return videos
     parts = re.split(r'<div class="relative group', html)[1:]
+    _log("parse_list blocks=%d" % len(parts))
     for p in parts:
         chunk = p[:5000]
         m = re.search(
@@ -127,6 +136,7 @@ def _parse_list(html):
             "vod_pic": pic,
             "vod_remarks": remarks,
         })
+    _log("parse_list videos=%d" % len(videos))
     return videos
 
 

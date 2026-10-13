@@ -10,7 +10,8 @@
 extend 用法（可选）：
   - 空：用默认域名 https://missav.ai
   - 直接写域名：https://missav.com  （站点换域名时用这个）
-  - JSON：{"host":"https://missav.com"}
+  - 直接写 cookie：cf_clearance=xxxx  （过 Cloudflare 盾用）
+  - JSON：{"host":"https://missav.com", "cookie":"cf_clearance=xxxx"}
 
 注意：missav 有 Cloudflare 防护，电视/盒子必须能正常打开 missav.ai，
 否则这个源也抓不到数据。
@@ -40,6 +41,7 @@ except Exception:
     pass
 
 HOST = "https://missav.ai"
+_COOKIE = ""
 
 
 def _log(msg):
@@ -51,8 +53,11 @@ def _log(msg):
 
 
 def _fetch(url):
+    headers = {"User-Agent": UA, "Referer": HOST + "/cn/"}
+    if _COOKIE:
+        headers["Cookie"] = _COOKIE
     try:
-        req = Request(url, headers={"User-Agent": UA, "Referer": HOST + "/cn/"})
+        req = Request(url, headers=headers)
         resp = urlopen(req, timeout=15, context=_SSL_CTX)
         raw = resp.read()
         for enc in ("utf-8", "gbk", "gb18030"):
@@ -130,25 +135,34 @@ class Spider(object):
     def __init__(self):
         self.extend = ""
         self.host = HOST
+        self.cookie = ""
 
     def init(self, extend=""):
-        global HOST
+        global HOST, _COOKIE
         self.extend = extend or ""
         ext = (extend or "").strip()
         host = ""
+        cookie = ""
         if ext.startswith("http"):
             host = ext
         elif ext.startswith("{"):
             try:
-                host = json.loads(ext).get("host") or ""
+                cfg = json.loads(ext)
+                host = cfg.get("host") or ""
+                cookie = cfg.get("cookie") or ""
             except Exception:
-                host = ""
+                pass
+        elif "cf_clearance=" in ext:
+            cookie = ext
         if host:
             self.host = host.rstrip("/")
             HOST = self.host
         else:
             self.host = HOST
-        _log("init ok, host=%s" % self.host)
+        if cookie:
+            _COOKIE = cookie
+            self.cookie = cookie
+        _log("init ok, host=%s, cookie=%s" % (self.host, bool(_COOKIE)))
         return self
 
     def homeContent(self, filter=False):

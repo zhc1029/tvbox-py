@@ -137,6 +137,9 @@ class Spider(object):
         self.host = HOST
         self.cookie = ""
 
+    def getDependence(self):
+        return []
+
     def init(self, extend=""):
         global HOST, _COOKIE
         self.extend = extend or ""

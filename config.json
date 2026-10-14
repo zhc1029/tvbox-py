@@ -1,5 +1,6 @@
 {
   "sites": [
-    {"key":"py_missav","name":"MissAV","type":3,"api":"https://raw.githubusercontent.com/zhc1029/tvbox-py/main/MissAV.py","ext":"cf_clearance=w.trPxhoThw5eM8pOKcqHVFS84tLCHTS0BkaL1WEcEo-1791909849-1.2.1.1-wZ9Az.n7ySFWgRbVunah5TOFhh6l2ndtVT3eP0uu077yHAD2fwJyiMfDgsZoadT7aBWYSpmVamIyoq5Ostf6J8m1E.zU67kA9jBSKj79f4DEBI3AXSsNjkhs23gXvqri9AQiwu5r8oNK4bv.TxViECNkIdtxMZSYK.exrALeg6Kk2eL8kqI64WcVybdYySZSOV7ZRL8oWCjmncZ3ZhtdHCUdPCW6rGw3bR1nmbtFO1PKvJZ7x8nxpVW7GN2pElTp9tDHQnvf1QIeFSGzI8R8bmcUinb4w2tIfUClVvVzy2bUZRg3yP2ZJ2C0uM8KDPpgnbnMEiT5Od10UaLkp6tC5XL8Q3Q508j.Z9_M0Bk9.Auf4G6PesKTkdZOI07lG_VUMpTVaHBxUw2m0ZgQ4Ap0dGNK8iHxy1JYpxoaq1AvQEa55zW4G2VH4JMo6FCAWp142AKaQAGLj4P_zmDK17PXRQ"}
+    {"key":"py_missav","name":"MissAV","type":3,"api":"https://raw.githubusercontent.com/zhc1029/tvbox-py/main/MissAV.py","ext":"..."},
+    {"key":"jipinvip","name":"极品资源","type":1,"api":"https://jipinvip.com/api.php/provide/vod/"}
   ]
 }
